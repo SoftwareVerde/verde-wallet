@@ -8,5 +8,5 @@ All of the core functionality provided (excluding UI) may be transpiled to iOS
 with the `./java-make.sh` script.  Also reference `ios/README` for more details.
 
 To use Verde Wallet as a library for other projects, consider running
-`./jar-builder.sh`. This script will create a dependency jar that can be imported.
+`./jar-builder/make-jar.sh`. This script will create a dependency jar that can be imported.
 
