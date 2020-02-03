@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="#202520" >
+
+    <ProgressBar
+        android:id="@+id/display_qr_code_progress_spinner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:indeterminateDrawable="@drawable/progress"
+        app:layout_constraintWidth_percent="0.25"
+        app:layout_constraintTop_toTopOf="@id/qr_code_display"
+        app:layout_constraintBottom_toBottomOf="@id/qr_code_display"
+        app:layout_constraintLeft_toLeftOf="@id/qr_code_display"
+    />
+
+    <include
+        android:id="@+id/qr_code_display"
+        layout="@layout/qr_code_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-50dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:visibility="visible"
+    />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/receive_address_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/qr_code_display"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/receive_address_swap_format_button"
+        android:gravity="center_horizontal|center_vertical"
+        android:textColor="#FFFFFF"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_marginLeft="42dp"
+        app:autoSizeMinTextSize="8sp"
+        app:autoSizeMaxTextSize="32sp"
+        app:autoSizeTextType="uniform"
+        android:text="qqswr73n8gzgsygazzfn9qm3qk46dtescsyrzewzuj"
+        android:visibility="visible"
+    />
+
+    <ImageView
+        android:id="@+id/receive_address_swap_format_button"
+        android:layout_width="36dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1"
+        android:src="@drawable/compare_icon"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/receive_address_text_view"
+        app:layout_constraintBottom_toBottomOf="@id/receive_address_text_view"
+        android:layout_margin="6dp"
+        android:visibility="visible"
+    />
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,34 @@
+
+apply plugin: 'com.android.library'
+
+group 'com.softwareverde.bitcoinverde.android'
+version '0.0.1'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation(project(':verde-wallet')) { transitive = false }
+
+    implementation group: 'com.android.support',                    name: 'appcompat-v7',           version: '28.0.0'
+    implementation group: 'com.android.support',                    name: 'support-compat',         version: '28.0.0'
+    implementation group: 'com.android.support',                    name: 'design',                 version: '28.0.0'
+
+    implementation group: 'com.github.softwareverde',               name: 'java-db-mysql',          version: 'v4.0.3'
+    implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'f7bc6521'
+}
+

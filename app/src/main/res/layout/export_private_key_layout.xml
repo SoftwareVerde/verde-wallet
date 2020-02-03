@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="#202520" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="KEEP THIS PHRASE SECRET"
+        android:textColor="#FFFFFF"
+        android:gravity="center_horizontal|center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_marginTop="6sp"
+    />
+
+    <ProgressBar
+        android:id="@+id/display_qr_code_progress_spinner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:indeterminateDrawable="@drawable/progress"
+        app:layout_constraintWidth_percent="0.25"
+        app:layout_constraintTop_toTopOf="@id/qr_code_display"
+        app:layout_constraintBottom_toBottomOf="@id/qr_code_display"
+        app:layout_constraintLeft_toLeftOf="@id/qr_code_display"
+    />
+
+    <include
+        android:id="@+id/qr_code_display"
+        layout="@layout/qr_code_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="150dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:visibility="visible"
+    />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/export_seed_phrase_text_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:textSize="14sp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/qr_code_display"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:gravity="center_horizontal|center_vertical"
+        android:textColor="#FF4545"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="42sp"
+        app:autoSizeTextType="uniform"
+        tools:text="panda eyebrow bullet gorilla call smoke muffin taste mesh discover soft ostrich alcohol speed nation flash devote level hobby quick inner drive ghost inside"
+        android:visibility="visible"
+    />
+
+</android.support.constraint.ConstraintLayout>

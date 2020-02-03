@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorAccent" >
+
+    <TextView
+        android:id="@+id/select_value_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="Title Text"
+        android:layout_marginTop="6dp"
+        android:layout_gravity="center_horizontal"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+    />
+
+    <TextView
+        android:id="@+id/select_value_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Content"
+        android:layout_margin="10dp"
+        android:textSize="16dp"
+        android:textColor="#D0D0D0"
+        android:textIsSelectable="false"
+    />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:background="#404040"
+        android:layout_marginTop="5dp"
+    />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="100dp" >
+
+        <RadioGroup
+            android:id="@+id/select_dialog_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20sp" >
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bitcoin (BCH)"
+                android:padding="10sp"
+                android:buttonTint="#F0F0F0"
+                android:textColor="#FFFFFF"
+                android:checked="true"
+                android:lines="1"
+            />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bitcoin Verde Test (BVT)"
+                android:padding="10sp"
+                android:buttonTint="#F0F0F0"
+                android:textColor="#FFFFFF"
+                android:lines="1"
+            />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dublin Points (DOP)"
+                android:padding="10sp"
+                android:buttonTint="#F0F0F0"
+                android:textColor="#FFFFFF"
+                android:lines="1"
+            />
+
+        </RadioGroup>
+
+    </ScrollView>
+
+</LinearLayout>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="5dp"
+    android:background="#000000" >
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/key_phrase_word"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal|center_vertical"
+        android:textColor="#FFFFFF"
+        android:background="#505050"
+        android:padding="5sp"
+        android:text="panda"
+        android:textStyle="bold"
+        android:lines="1"
+        android:textSize="16sp"
+        app:autoSizeMinTextSize="18sp"
+        app:autoSizeMaxTextSize="32sp"
+        app:autoSizeTextType="uniform"
+    />
+
+</LinearLayout>

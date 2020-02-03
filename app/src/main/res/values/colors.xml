@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#059F47</color> <!-- green color from leaf icon -->
+    <color name="colorPrimaryDark">#108B3F</color> <!-- dark green color from bottom of website -->
+    <color name="colorAccent">#202520</color> <!-- dark gray color from website -->
+    <!--color name="colorAccent">#82BE37</color--> <!-- light green color from website -->
+    <color name="white">#FFFFFF</color>
+
+    <color name="scannerMaskColor">#B0111111</color>
+    <color name="scannerMaskBorderColor">@color/colorPrimary</color>
+    <color name="scannerResultColor">@color/colorPrimary</color>
+    <color name="scannerLaserColor">#00000000</color>
+    <color name="scannerResultPointColor">@color/colorPrimary</color>
+
+</resources>

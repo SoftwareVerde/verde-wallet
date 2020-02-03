@@ -1,0 +1,6 @@
+include ":java", ":android"
+
+rootProject.name="jar-builder"
+
+project(":java").name = 'verde-wallet'
+project(":android").name = 'verde-wallet-android'

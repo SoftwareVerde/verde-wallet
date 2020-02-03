@@ -1,0 +1,29 @@
+apply plugin: 'idea'
+
+idea {
+    module {
+        excludeDirs += file('jar-builder')
+    }
+}
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath group: 'com.android.tools.build', name: 'gradle', version: '3.5.3'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorAccent" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:text="Verde Wallet"
+        android:gravity="center_vertical|center_horizontal"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:layout_marginTop="225sp"
+        android:layout_alignParentTop="true"
+    />
+
+    <ProgressBar
+        android:layout_width="50sp"
+        android:layout_height="50sp"
+        android:indeterminateDrawable="@drawable/progress"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="300sp"
+    />
+
+    <include
+        layout="@layout/loading_status_template"
+    />
+
+</RelativeLayout>
