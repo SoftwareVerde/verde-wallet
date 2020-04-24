@@ -11,6 +11,7 @@
 
 src/
 *.jar
+!gradle/wrapper/gradle-wrapper.jar 
 
 java/build/
 android/build/
