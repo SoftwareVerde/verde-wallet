@@ -26,9 +26,9 @@ import com.softwareverde.bitcoin.app.R;
 import com.softwareverde.bitcoin.app.android.BitcoinUtil;
 import com.softwareverde.bitcoin.app.android.adapter.KeyPhraseWordListAdapter;
 import com.softwareverde.bitcoin.app.lib.BitcoinVerde;
-import com.softwareverde.bitcoin.secp256k1.key.PrivateKey;
 import com.softwareverde.bitcoin.wallet.SeedPhraseGenerator;
 import com.softwareverde.constable.bytearray.ByteArray;
+import com.softwareverde.cryptography.secp256k1.key.PrivateKey;
 
 public class ImportPrivateKeyFragment extends VerdeFragment {
     public interface ImportPrivateKeyCallback {

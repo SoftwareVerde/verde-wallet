@@ -15,8 +15,8 @@ import com.softwareverde.android.util.AndroidUtil;
 import com.softwareverde.android.util.QrUtil;
 import com.softwareverde.bitcoin.app.R;
 import com.softwareverde.bitcoin.app.lib.BitcoinVerde;
-import com.softwareverde.bitcoin.secp256k1.key.PrivateKey;
-import com.softwareverde.bitcoin.secp256k1.key.PublicKey;
+import com.softwareverde.cryptography.secp256k1.key.PrivateKey;
+import com.softwareverde.cryptography.secp256k1.key.PublicKey;
 
 public class ExportPrivateKeyFragment extends VerdeFragment {
     protected static final String TAG = DisplayReceiveAddressFragment.class.getSimpleName();

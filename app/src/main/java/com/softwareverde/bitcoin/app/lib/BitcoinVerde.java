@@ -10,9 +10,6 @@ import com.softwareverde.bitcoin.block.header.BlockHeader;
 import com.softwareverde.bitcoin.block.header.BlockHeaderInflater;
 import com.softwareverde.bitcoin.chain.segment.BlockchainSegmentId;
 import com.softwareverde.bitcoin.chain.time.MedianBlockTime;
-import com.softwareverde.bitcoin.hash.sha256.Sha256Hash;
-import com.softwareverde.bitcoin.secp256k1.key.PrivateKey;
-import com.softwareverde.bitcoin.secp256k1.key.PublicKey;
 import com.softwareverde.bitcoin.server.Environment;
 import com.softwareverde.bitcoin.server.configuration.SeedNodeProperties;
 import com.softwareverde.bitcoin.server.database.Database;
@@ -48,6 +45,9 @@ import com.softwareverde.concurrent.pool.MainThreadPool;
 import com.softwareverde.constable.bytearray.MutableByteArray;
 import com.softwareverde.constable.list.List;
 import com.softwareverde.constable.list.mutable.MutableList;
+import com.softwareverde.cryptography.hash.sha256.Sha256Hash;
+import com.softwareverde.cryptography.secp256k1.key.PrivateKey;
+import com.softwareverde.cryptography.secp256k1.key.PublicKey;
 import com.softwareverde.database.DatabaseException;
 import com.softwareverde.database.row.Row;
 import com.softwareverde.database.util.TransactionUtil;
@@ -359,7 +359,7 @@ public class BitcoinVerde {
             final AddressInflater addressInflater = new AddressInflater();
             final MutableList<Address> addresses = new MutableList<Address>();
             for (final PrivateKey privateKey : privateKeys) {
-                final Address address = addressInflater.fromPrivateKey(privateKey);
+                final Address address = addressInflater.uncompressedFromPrivateKey(privateKey);
                 final Address compressedAddress = addressInflater.compressedFromPrivateKey(privateKey);
 
                 addresses.add(address);
@@ -1246,7 +1246,7 @@ public class BitcoinVerde {
             return addressInflater.compressedFromBase58Check(changeAddressString);
         }
         else {
-            return addressInflater.fromBase58Check(changeAddressString);
+            return addressInflater.uncompressedFromBase58Check(changeAddressString);
         }
     }
 
@@ -1331,7 +1331,7 @@ public class BitcoinVerde {
             final AddressInflater addressInflater = new AddressInflater();
             final MutableList<Address> addresses = new MutableList<Address>();
             for (final PrivateKey privateKey : privateKeys) {
-                final Address address = addressInflater.fromPrivateKey(privateKey);
+                final Address address = addressInflater.uncompressedFromPrivateKey(privateKey);
                 final Address compressedAddress = addressInflater.compressedFromPrivateKey(privateKey);
 
                 addresses.add(address);

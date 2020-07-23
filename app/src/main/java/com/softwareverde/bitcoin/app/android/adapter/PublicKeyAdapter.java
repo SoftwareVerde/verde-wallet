@@ -11,9 +11,9 @@ import com.softwareverde.bitcoin.address.Address;
 import com.softwareverde.bitcoin.address.AddressInflater;
 import com.softwareverde.bitcoin.app.R;
 import com.softwareverde.bitcoin.app.StringUtil;
-import com.softwareverde.bitcoin.secp256k1.key.PublicKey;
 import com.softwareverde.constable.list.List;
 import com.softwareverde.constable.list.mutable.MutableList;
+import com.softwareverde.cryptography.secp256k1.key.PublicKey;
 import com.softwareverde.util.Util;
 
 import java.util.Comparator;
@@ -107,7 +107,7 @@ public class PublicKeyAdapter extends RecyclerView.Adapter<PublicKeyAdapter.View
         final Long balance = _balances.get(publicKey);
 
         final AddressInflater addressInflater = new AddressInflater();
-        final Address address = addressInflater.fromPublicKey(publicKey);
+        final Address address = addressInflater.uncompressedFromPublicKey(publicKey);
         final Address compressedAddress = addressInflater.compressedFromPublicKey(publicKey);
 
         viewHolder.decompressedAddressTextView.setText(address.toBase58CheckEncoded());

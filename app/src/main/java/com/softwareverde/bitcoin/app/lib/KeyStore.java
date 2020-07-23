@@ -1,8 +1,8 @@
 package com.softwareverde.bitcoin.app.lib;
 
-import com.softwareverde.bitcoin.secp256k1.key.PrivateKey;
-import com.softwareverde.bitcoin.secp256k1.key.PublicKey;
 import com.softwareverde.constable.list.List;
+import com.softwareverde.cryptography.secp256k1.key.PrivateKey;
+import com.softwareverde.cryptography.secp256k1.key.PublicKey;
 
 public interface KeyStore {
     Boolean hasKeys();

@@ -10,7 +10,7 @@ import com.softwareverde.android.util.FragmentUtil;
 import com.softwareverde.bitcoin.app.android.activity.VerdeActivity;
 import com.softwareverde.bitcoin.app.android.fragment.ImportPrivateKeyFragment;
 import com.softwareverde.bitcoin.app.lib.BitcoinVerde;
-import com.softwareverde.bitcoin.secp256k1.key.PrivateKey;
+import com.softwareverde.cryptography.secp256k1.key.PrivateKey;
 
 public class ImportPrivateKeyActivity extends VerdeActivity {
     protected static final String TAG = ImportPrivateKeyActivity.class.getSimpleName();

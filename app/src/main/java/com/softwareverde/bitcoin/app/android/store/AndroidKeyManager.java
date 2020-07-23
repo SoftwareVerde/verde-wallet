@@ -9,12 +9,12 @@ import com.softwareverde.android.security.EncryptedKeyStore;
 import com.softwareverde.android.security.SharedPreferencesEncryptedKeyStore;
 import com.softwareverde.bitcoin.app.lib.KeyStore;
 import com.softwareverde.bitcoin.app.lib.KeyValueStore;
-import com.softwareverde.bitcoin.secp256k1.key.PrivateKey;
-import com.softwareverde.bitcoin.secp256k1.key.PublicKey;
 import com.softwareverde.constable.bytearray.ByteArray;
 import com.softwareverde.constable.bytearray.MutableByteArray;
 import com.softwareverde.constable.list.List;
 import com.softwareverde.constable.list.mutable.MutableList;
+import com.softwareverde.cryptography.secp256k1.key.PrivateKey;
+import com.softwareverde.cryptography.secp256k1.key.PublicKey;
 import com.softwareverde.security.rsa.JcaRsaKeys;
 import com.softwareverde.util.Util;
 
@@ -131,7 +131,7 @@ public class AndroidKeyManager implements KeyStore {
     }
 
     protected Integer _getKeyCount() {
-        return Util.parseInt(_getSharedPreferenceValue(SharedPreferenceKeys.KEY_COUNT));
+        return Util.parseInt(_getSharedPreferenceValue(SharedPreferenceKeys.KEY_COUNT), 0);
     }
 
     public AndroidKeyManager(final Context context) {
@@ -221,7 +221,7 @@ public class AndroidKeyManager implements KeyStore {
 
     @Override
     public synchronized Long getInitializationTimestamp() {
-        return Util.parseLong(_getSharedPreferenceValue(SharedPreferenceKeys.INIT_TIMESTAMP));
+        return Util.parseLong(_getSharedPreferenceValue(SharedPreferenceKeys.INIT_TIMESTAMP), 0L);
     }
 
     @Override
