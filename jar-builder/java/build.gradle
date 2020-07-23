@@ -20,8 +20,8 @@ dependencies {
 //
 //    compile group: 'com.github.softwareverde',  name: 'java-db-mysql',          version: 'v3.0.1'
 //    compile group: 'com.github.softwareverde',  name: 'java-db-mysql-embedded', version: 'v1.0.1'
-    implementation group: 'com.github.softwareverde',               name: 'java-db-mysql',          version: 'v4.0.3'
-    implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'f7bc6521'
+    implementation group: 'com.github.softwareverde',               name: 'java-db-mysql',          version: 'v4.0.8'
+    implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'c4083034'
     implementation group: 'com.google.j2objc',                      name: 'j2objc-annotations',     version: '1.3'
 }
 
