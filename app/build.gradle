@@ -63,7 +63,7 @@ dependencies {
 
     implementation group: 'com.github.softwareverde',               name: 'java-db-mysql',          version: 'v4.0.8'
     implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'c4083034' // 'development-SNAPSHOT'
-    implementation group: 'com.github.softwareverde',               name: 'java-http-client',       version: 'v2.0.0'
+    implementation group: 'com.github.softwareverde',               name: 'java-http-client',       version: 'v2.0.1'
 
     implementation group: 'com.google.zxing',                       name: 'core',                   version: '3.3.3'
     implementation group: 'com.google.zxing',                       name: 'android-core',           version: '3.3.0'
