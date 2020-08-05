@@ -31,12 +31,12 @@ public class SlpScriptTests {
         slpGenesisScript.setDocumentUrl("https://simpleledger.cash/");
         slpGenesisScript.setDocumentHash(null);
         slpGenesisScript.setDecimalCount(8);
-        slpGenesisScript.setGeneratorOutputIndex(0);
+        slpGenesisScript.setBatonOutputIndex(null);
         slpGenesisScript.setTokenCount(21000000L * Transaction.SATOSHIS_PER_BITCOIN); // Since DecimalCount is 8, which is the same as the native token...
 
         // Action
         final LockingScript lockingScript = slpScriptBuilder.createGenesisScript(slpGenesisScript);
-        final SlpScriptType slpScriptType = slpScriptInflater.getScriptType(lockingScript);
+        final SlpScriptType slpScriptType = SlpScriptInflater.getScriptType(lockingScript);
 
         // Assert
         Assert.assertEquals(scriptDeflater.toBytes(expectedLockingScript), scriptDeflater.toBytes(lockingScript));

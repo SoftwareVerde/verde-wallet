@@ -29,6 +29,6 @@ dependencies {
     implementation group: 'com.android.support',                    name: 'design',                 version: '28.0.0'
 
     implementation group: 'com.github.softwareverde',               name: 'java-db-mysql',          version: 'v4.0.8'
-    implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'c4083034'
+    implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: '1.3.1'
 }
 
