@@ -15,10 +15,6 @@ import com.softwareverde.bitcoin.server.configuration.SeedNodeProperties;
 import com.softwareverde.bitcoin.server.database.Database;
 import com.softwareverde.bitcoin.server.database.DatabaseConnection;
 import com.softwareverde.bitcoin.server.database.DatabaseConnectionFactory;
-import com.softwareverde.bitcoin.server.database.cache.DisabledDatabaseManagerCache;
-import com.softwareverde.bitcoin.server.database.cache.LocalDatabaseManagerCache;
-import com.softwareverde.bitcoin.server.database.cache.MasterDatabaseManagerCache;
-import com.softwareverde.bitcoin.server.database.cache.MasterDatabaseManagerCacheCore;
 import com.softwareverde.bitcoin.server.database.pool.DatabaseConnectionPool;
 import com.softwareverde.bitcoin.server.database.query.Query;
 import com.softwareverde.bitcoin.server.message.type.node.feature.NodeFeatures;
@@ -90,7 +86,6 @@ public class BitcoinVerde {
     public static class InitData {
         public Database database;
         public InputStream bootstrapHeaders;
-        public String postBootstrapInitSql;
         public KeyStore keyStore;
         public KeyValueStore keyValueStore;
         public List<String> seedPhraseWords;
@@ -123,8 +118,6 @@ public class BitcoinVerde {
     public interface TransactionValidityChangedCallback {
         void onTransactionValidityChanged(Sha256Hash transactionHash, SlpValidity validity);
     }
-
-    protected static final Integer MAX_BATCH_SIZE = 100;
 
     protected static final Object MUTEX = new Object();
     protected static BitcoinVerde INSTANCE = null;
@@ -169,7 +162,6 @@ public class BitcoinVerde {
     }
 
     protected final SystemTime _systemTime = new SystemTime();
-    protected final DisabledDatabaseManagerCache _disabledDatabaseCache;
 
     protected Status _status = Status.OFFLINE;
     protected Runnable _onStatusUpdatedCallback = null;
@@ -304,8 +296,7 @@ public class BitcoinVerde {
 
             final Database database = _environment.getDatabase();
             try (final DatabaseConnection databaseConnection = database.newConnection()) {
-                final LocalDatabaseManagerCache localDatabaseManagerCache = new LocalDatabaseManagerCache();
-                final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, localDatabaseManagerCache);
+                final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
                 final BlockchainDatabaseManager blockchainDatabaseManager = databaseManager.getBlockchainDatabaseManager();
                 final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
@@ -359,8 +350,8 @@ public class BitcoinVerde {
             final AddressInflater addressInflater = new AddressInflater();
             final MutableList<Address> addresses = new MutableList<Address>();
             for (final PrivateKey privateKey : privateKeys) {
-                final Address address = addressInflater.uncompressedFromPrivateKey(privateKey);
-                final Address compressedAddress = addressInflater.compressedFromPrivateKey(privateKey);
+                final Address address = addressInflater.fromPrivateKey(privateKey, false);
+                final Address compressedAddress = addressInflater.fromPrivateKey(privateKey, true);
 
                 addresses.add(address);
                 addresses.add(compressedAddress);
@@ -394,7 +385,7 @@ public class BitcoinVerde {
 
         final List<PrivateKey> privateKeys = _secureKeyStore.getPrivateKeys();
 
-        Logger.debug("Storing " + privateKeys.getSize() + " private keys in wallet");
+        Logger.debug("Storing " + privateKeys.getCount() + " private keys in wallet");
         _wallet.addPrivateKeys(privateKeys);
 
         for (final Runnable walletUpdatedCallback : _walletUpdatedCallbacks) {
@@ -414,15 +405,10 @@ public class BitcoinVerde {
             public void banIp(final Ip ip) { }
         };
 
-        final BitcoinNodeManager.Properties nodeManagerProperties = new BitcoinNodeManager.Properties();
-        nodeManagerProperties.maxNodeCount = 6;
-        nodeManagerProperties.banFilter = banFilter;
-
         _setStatus(Status.INITIALIZING_DATABASE);
 
         final Database database = _initData.database;
         final WeakReference<Database> databaseWeakReference = new WeakReference<>(_initData.database);
-        final MasterDatabaseManagerCache masterDatabaseManagerCache = new MasterDatabaseManagerCacheCore();
         @WeakOuter final DatabaseConnectionPool databaseConnectionPool = new DatabaseConnectionPool() {
             protected final DatabaseConnectionFactory _databaseConnectionFactory = databaseWeakReference.get().newConnectionFactory();
 
@@ -436,7 +422,7 @@ public class BitcoinVerde {
                 // Nothing.
             }
         };
-        _environment = new Environment(_initData.database, databaseConnectionPool, masterDatabaseManagerCache);
+        _environment = new Environment(_initData.database, databaseConnectionPool);
         _secureKeyStore = _initData.keyStore;
         _keyValueStore = _initData.keyValueStore;
         _priceIndexer = _initData.priceIndexer;
@@ -491,8 +477,7 @@ public class BitcoinVerde {
         }
 
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final LocalDatabaseManagerCache localDatabaseManagerCache = new LocalDatabaseManagerCache();
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, localDatabaseManagerCache);
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
             final BlockId headBlockHeaderId = blockHeaderDatabaseManager.getHeadBlockHeaderId();
@@ -559,10 +544,19 @@ public class BitcoinVerde {
                         }
 
                         batchedHeaders.add(blockHeader);
-                        if (batchedHeaders.getSize() == batchSize) {
+                        if (batchedHeaders.getCount() == batchSize) {
                             synchronized (BlockHeaderDatabaseManager.MUTEX) {
                                 TransactionUtil.startTransaction(databaseConnection);
-                                final List<BlockId> blockIds = blockHeaderDatabaseManager.insertBlockHeaders(batchedHeaders, MAX_BATCH_SIZE);
+
+                                final List<BlockId> blockIds;
+                                try {
+                                    try { databaseConnection.executeSql(new Query("PRAGMA foreign_keys = OFF")); } catch (final Exception exception) { Logger.debug(exception); }
+                                    blockIds = blockHeaderDatabaseManager.insertBlockHeaders(batchedHeaders);
+                                }
+                                finally {
+                                    try { databaseConnection.executeSql(new Query("PRAGMA foreign_keys = ON")); } catch (final Exception exception) { Logger.debug(exception); }
+                                }
+
                                 TransactionUtil.commitTransaction(databaseConnection);
 
                                 batchedHeaders.clear();
@@ -571,7 +565,7 @@ public class BitcoinVerde {
                                     Logger.warn("No block headers stored from batch of size: " + batchSize);
                                     break;
                                 }
-                                currentBlockHeight += blockIds.getSize();
+                                currentBlockHeight += blockIds.getCount();
                             }
                         }
 
@@ -590,13 +584,13 @@ public class BitcoinVerde {
                     if (! batchedHeaders.isEmpty()) {
                         synchronized (BlockHeaderDatabaseManager.MUTEX) {
                             TransactionUtil.startTransaction(databaseConnection);
-                            final List<BlockId> blockIds = blockHeaderDatabaseManager.insertBlockHeaders(batchedHeaders, MAX_BATCH_SIZE);
+                            final List<BlockId> blockIds = blockHeaderDatabaseManager.insertBlockHeaders(batchedHeaders);
                             TransactionUtil.commitTransaction(databaseConnection);
 
                             batchedHeaders.clear();
 
                             if (blockIds != null) {
-                                _currentBlockHeight += blockIds.getSize();
+                                _currentBlockHeight += blockIds.getCount();
                             }
                         }
                     }
@@ -612,7 +606,6 @@ public class BitcoinVerde {
                 }
 
                 _setStatus(Status.INDEXING);
-                runSqlInitFile(databaseConnection, _initData.postBootstrapInitSql);
             }
         }
         catch (final Exception exception) {
@@ -623,7 +616,7 @@ public class BitcoinVerde {
 
         _setStatus(Status.STARTING);
 
-        _spvModule = new SpvModule(_environment, seedNodes, _wallet);
+        _spvModule = new SpvModule(_environment, seedNodes, 8, _wallet);
         _spvModule.setOnStatusUpdatedCallback(_onStatusUpdatedCallback);
         _spvModule.setShouldOnlyConnectToSeedNodes(Util.coalesce(_initData.shouldOnlyConnectToSeedNodes, false));
 
@@ -674,7 +667,7 @@ public class BitcoinVerde {
         }
 
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection);
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
             final BlockId headBlockId = blockHeaderDatabaseManager.getHeadBlockHeaderId();
@@ -801,7 +794,7 @@ public class BitcoinVerde {
 
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection);
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
             final BlockchainDatabaseManager blockchainDatabaseManager = databaseManager.getBlockchainDatabaseManager();
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
@@ -855,7 +848,7 @@ public class BitcoinVerde {
             walletUpdatedCallbacks.run();
         }
 
-        return addressInflater.compressedFromPrivateKey(privateKey);
+        return addressInflater.fromPrivateKey(privateKey, true);
     }
 
     protected void _updateBloomFilter() {
@@ -910,8 +903,6 @@ public class BitcoinVerde {
         @WeakOuter final Thread.UncaughtExceptionHandler uncaughtExceptionHandler = (thread, exception) -> Logger.error("Uncaught exception in thread " + thread.getName() + "(" + thread.getId() + ")", exception);
         _initThread.setUncaughtExceptionHandler(uncaughtExceptionHandler);
         _initThread.start();
-
-        _disabledDatabaseCache = new DisabledDatabaseManagerCache();
     }
 
     public void setOnInitCompleteCallback(final Runnable callback) {
@@ -987,7 +978,7 @@ public class BitcoinVerde {
 
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection);
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
             final BlockId headBlockHeaderId = blockHeaderDatabaseManager.getHeadBlockHeaderId();
@@ -1088,7 +1079,7 @@ public class BitcoinVerde {
 
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection);
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
             final BlockchainDatabaseManager blockchainDatabaseManager = databaseManager.getBlockchainDatabaseManager();
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
             final TransactionDatabaseManager transactionDatabaseManager = databaseManager.getTransactionDatabaseManager();
@@ -1243,10 +1234,10 @@ public class BitcoinVerde {
 
         final AddressInflater addressInflater = new AddressInflater();
         if (Util.parseBool(_keyValueStore.getString(KeyValueStoreKeys.CHANGE_ADDRESS_IS_COMPRESSED))) {
-            return addressInflater.compressedFromBase58Check(changeAddressString);
+            return addressInflater.fromBase58Check(changeAddressString, true);
         }
         else {
-            return addressInflater.uncompressedFromBase58Check(changeAddressString);
+            return addressInflater.fromBase58Check(changeAddressString, false);
         }
     }
 
@@ -1296,8 +1287,7 @@ public class BitcoinVerde {
     public void clearMerkleBlocksAfterTimestamp(final Long timestampInSeconds) {
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final LocalDatabaseManagerCache localDatabaseManagerCache = new LocalDatabaseManagerCache();
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, localDatabaseManagerCache);
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
             final SpvBlockDatabaseManager spvBlockDatabaseManager = databaseManager.getBlockDatabaseManager();
 
@@ -1331,8 +1321,8 @@ public class BitcoinVerde {
             final AddressInflater addressInflater = new AddressInflater();
             final MutableList<Address> addresses = new MutableList<Address>();
             for (final PrivateKey privateKey : privateKeys) {
-                final Address address = addressInflater.uncompressedFromPrivateKey(privateKey);
-                final Address compressedAddress = addressInflater.compressedFromPrivateKey(privateKey);
+                final Address address = addressInflater.fromPrivateKey(privateKey, false);
+                final Address compressedAddress = addressInflater.fromPrivateKey(privateKey, true);
 
                 addresses.add(address);
                 addresses.add(compressedAddress);
@@ -1347,8 +1337,7 @@ public class BitcoinVerde {
             @WeakOuter final Runnable runnable = () -> bitcoinVerdeNode.getAddressBlocks(addresses, (bitcoinNode, blockHashes) -> {
                 final Database database = _environment.getDatabase();
                 try (final DatabaseConnection databaseConnection = database.newConnection()) {
-                    final LocalDatabaseManagerCache localDatabaseManagerCache = new LocalDatabaseManagerCache();
-                    final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, localDatabaseManagerCache);
+                    final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
                     final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
                     final SpvBlockDatabaseManager spvBlockDatabaseManager = databaseManager.getBlockDatabaseManager();
 
@@ -1376,8 +1365,7 @@ public class BitcoinVerde {
 
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final LocalDatabaseManagerCache localDatabaseManagerCache = new LocalDatabaseManagerCache();
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, localDatabaseManagerCache);
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
             final SpvTransactionDatabaseManager transactionDatabaseManager = databaseManager.getTransactionDatabaseManager();
 
             TransactionUtil.startTransaction(databaseConnection);

@@ -107,8 +107,8 @@ public class PublicKeyAdapter extends RecyclerView.Adapter<PublicKeyAdapter.View
         final Long balance = _balances.get(publicKey);
 
         final AddressInflater addressInflater = new AddressInflater();
-        final Address address = addressInflater.uncompressedFromPublicKey(publicKey);
-        final Address compressedAddress = addressInflater.compressedFromPublicKey(publicKey);
+        final Address address = addressInflater.fromPublicKey(publicKey, false);
+        final Address compressedAddress = addressInflater.fromPublicKey(publicKey, true);
 
         viewHolder.decompressedAddressTextView.setText(address.toBase58CheckEncoded());
         viewHolder.compressedAddressTextView.setText(compressedAddress.toBase58CheckEncoded());

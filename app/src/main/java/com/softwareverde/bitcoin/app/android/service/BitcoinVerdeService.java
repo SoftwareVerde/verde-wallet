@@ -196,11 +196,8 @@ public class BitcoinVerdeService extends Service {
                     break;
                 }
                 else {
-                    final String metadataInitSql = SpvResourceLoader.getResource(SpvResourceLoader.INIT_SQL_METADATA_SQLITE);
-                    final String preBootstrapInitSql = SpvResourceLoader.getResource(SpvResourceLoader.INIT_SQL_SQLITE);
-
-                    BitcoinVerde.runSqlInitFile(databaseConnection, metadataInitSql);
-                    BitcoinVerde.runSqlInitFile(databaseConnection, preBootstrapInitSql);
+                    final String initSql = SpvResourceLoader.getResource(SpvResourceLoader.INIT_SQL_SQLITE);
+                    BitcoinVerde.runSqlInitFile(databaseConnection, initSql);
                     break;
                 }
             }
@@ -250,7 +247,6 @@ public class BitcoinVerdeService extends Service {
         try {
             initData.database = database;
             initData.bootstrapHeaders = SpvResourceLoader.getResourceAsStream(SpvResourceLoader.BOOTSTRAP_HEADERS);
-            initData.postBootstrapInitSql = SpvResourceLoader.getResource(SpvResourceLoader.INIT_SQL_INDEXES_SQLITE);
             initData.keyStore = new AndroidKeyManager(applicationContext);
             initData.keyValueStore = new SharedPreferencesKeyValueStore(applicationContext, "wallet_preferences");
             initData.priceIndexer = new BitcoinDotComPriceIndexer();

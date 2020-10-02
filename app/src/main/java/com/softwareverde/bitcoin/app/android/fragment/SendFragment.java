@@ -448,7 +448,7 @@ public class SendFragment extends VerdeFragment {
                     @Override
                     public void run(final String originalValueString, final String newValueString) {
                         final AddressInflater addressInflater = new AddressInflater();
-                        final Address newAddress = addressInflater.uncompressedFromBase58Check(newValueString);
+                        final Address newAddress = addressInflater.fromBase58Check(newValueString, false);
                         if (newAddress == null) { return; }
 
                         _sendToAddress = newAddress;
@@ -584,14 +584,14 @@ public class SendFragment extends VerdeFragment {
             final Boolean displayAsLegacyAddress;
             final Address address;
             {
-                final Address legacyAddress = addressInflater.uncompressedFromBase58Check(addressStringWithoutProtocol);
+                final Address legacyAddress = addressInflater.fromBase58Check(addressStringWithoutProtocol, false);
                 if (legacyAddress != null) {
                     address = legacyAddress;
                     displayAsLegacyAddress = true;
                 }
                 else {
                     Logger.info("Scanned address: " + addressString);
-                    final Address base32Address = addressInflater.uncompressedFromBase32Check(addressString);
+                    final Address base32Address = addressInflater.fromBase32Check(addressString, true);
                     if (base32Address == null) { return; }
                     address = base32Address;
                     displayAsLegacyAddress = false;

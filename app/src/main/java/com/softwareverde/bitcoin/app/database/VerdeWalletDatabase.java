@@ -26,8 +26,18 @@ public class VerdeWalletDatabase implements Database {
     }
 
     @Override
+    public DatabaseConnection getMaintenanceConnection() throws DatabaseException {
+        return _core.newConnection();
+    }
+
+    @Override
     public DatabaseConnectionFactory newConnectionFactory() {
         return _newConnectionFactory();
+    }
+
+    @Override
+    public Integer getMaxQueryBatchSize() {
+        return 99;
     }
 
     @Override

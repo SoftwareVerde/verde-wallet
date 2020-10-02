@@ -1,5 +1,6 @@
 package com.softwareverde.bitcoin.app.database.wrapper;
 
+
 import com.softwareverde.bitcoin.server.database.DatabaseConnection;
 import com.softwareverde.bitcoin.server.database.DatabaseConnectionFactory;
 import com.softwareverde.database.android.sqlite.AndroidSqliteDatabaseConnectionFactory;

@@ -183,7 +183,7 @@ public class PublicKeysFragment extends VerdeFragment {
             @Override
             public void onClick(final PublicKey publicKey) {
                 final AddressInflater addressInflater = new AddressInflater();
-                final Address address = addressInflater.compressedFromPublicKey(publicKey);
+                final Address address = addressInflater.fromPublicKey(publicKey, true);
 
                 final String SET_CHANGE_ADDRESS = "Set Change Address";
                 final String EXPORT_ACTION = "Export";
