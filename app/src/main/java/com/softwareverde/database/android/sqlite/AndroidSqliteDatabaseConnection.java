@@ -36,6 +36,15 @@ public class AndroidSqliteDatabaseConnection implements DatabaseConnection<Conne
         return queryString;
     }
 
+    protected String _convertOnDuplicateKeyUpdate(final String queryString) {
+        final int startIndex = queryString.indexOf(" ON DUPLICATE KEY");
+        if (startIndex >= 0) {
+            return queryString.substring(0, startIndex).replaceFirst("INSERT", "INSERT OR REPLACE");
+        }
+
+        return queryString;
+    }
+
     protected String _convertIsNull(final String queryString) {
         if (queryString.contains("IS NULL")) {
             return queryString.replaceAll("IS NULL", "IN (NULL, '')");
@@ -160,14 +169,14 @@ public class AndroidSqliteDatabaseConnection implements DatabaseConnection<Conne
 
     @Override
     public synchronized Long executeSql(final String query, final String[] parameters) {
-        final String queryString = _convertIsNull(_convertInsertIgnore(query));
+        final String queryString = _convertIsNull(_convertOnDuplicateKeyUpdate(_convertInsertIgnore(query)));
 
         return _executeWithInsertId(queryString, parameters);
     }
 
     @Override
     public synchronized Long executeSql(final Query query) {
-        final String queryString = _convertIsNull(_convertInsertIgnore(query.getQueryString()));
+        final String queryString = _convertIsNull(_convertOnDuplicateKeyUpdate(_convertInsertIgnore(query.getQueryString())));
         final String[] parameterStrings = _parametersToStringArray(query);
         return _executeWithInsertId(queryString, parameterStrings);
     }

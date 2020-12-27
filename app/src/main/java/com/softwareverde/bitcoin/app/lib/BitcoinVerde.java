@@ -1,5 +1,7 @@
 package com.softwareverde.bitcoin.app.lib;
 
+import android.util.Log;
+
 import com.google.j2objc.annotations.AutoreleasePool;
 import com.google.j2objc.annotations.WeakOuter;
 import com.softwareverde.async.ConcurrentHashSet;
@@ -11,7 +13,8 @@ import com.softwareverde.bitcoin.block.header.BlockHeaderInflater;
 import com.softwareverde.bitcoin.chain.segment.BlockchainSegmentId;
 import com.softwareverde.bitcoin.chain.time.MedianBlockTime;
 import com.softwareverde.bitcoin.server.Environment;
-import com.softwareverde.bitcoin.server.configuration.SeedNodeProperties;
+import com.softwareverde.bitcoin.server.configuration.CheckpointConfiguration;
+import com.softwareverde.bitcoin.server.configuration.NodeProperties;
 import com.softwareverde.bitcoin.server.database.Database;
 import com.softwareverde.bitcoin.server.database.DatabaseConnection;
 import com.softwareverde.bitcoin.server.database.DatabaseConnectionFactory;
@@ -26,6 +29,7 @@ import com.softwareverde.bitcoin.server.module.node.database.transaction.Transac
 import com.softwareverde.bitcoin.server.module.node.database.transaction.spv.SlpValidity;
 import com.softwareverde.bitcoin.server.module.node.database.transaction.spv.SpvTransactionDatabaseManager;
 import com.softwareverde.bitcoin.server.module.node.manager.BitcoinNodeManager;
+import com.softwareverde.bitcoin.server.module.node.manager.NodeFilter;
 import com.softwareverde.bitcoin.server.module.node.manager.banfilter.BanFilter;
 import com.softwareverde.bitcoin.server.module.node.manager.banfilter.BanFilterCore;
 import com.softwareverde.bitcoin.server.module.spv.SpvModule;
@@ -50,7 +54,6 @@ import com.softwareverde.database.util.TransactionUtil;
 import com.softwareverde.logging.Logger;
 import com.softwareverde.network.ip.Ip;
 import com.softwareverde.network.p2p.node.NodeId;
-import com.softwareverde.network.p2p.node.manager.NodeManager;
 import com.softwareverde.util.Container;
 import com.softwareverde.util.HexUtil;
 import com.softwareverde.util.IoUtil;
@@ -91,7 +94,7 @@ public class BitcoinVerde {
         public List<String> seedPhraseWords;
         public PriceIndexer priceIndexer;
         public Boolean shouldOnlyConnectToSeedNodes;
-        public SeedNodeProperties[] seedNodes;
+        public List<NodeProperties> seedNodes;
     }
 
     protected static InitData INIT_DATA = null;
@@ -168,6 +171,7 @@ public class BitcoinVerde {
     protected NewTransactionCallback _newTransactionCallback;
     protected TransactionValidityChangedCallback _transactionValidityChangedCallback;
     protected final ConcurrentHashSet<Runnable> _walletUpdatedCallbacks = new ConcurrentHashSet<Runnable>();
+    protected final CheckpointConfiguration _checkpointConfiguration = new CheckpointConfiguration();
 
     protected Thread _initThread = null;
     protected volatile Boolean _abortInit = false;
@@ -296,7 +300,7 @@ public class BitcoinVerde {
 
             final Database database = _environment.getDatabase();
             try (final DatabaseConnection databaseConnection = database.newConnection()) {
-                final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
+                final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize(), _checkpointConfiguration);
                 final BlockchainDatabaseManager blockchainDatabaseManager = databaseManager.getBlockchainDatabaseManager();
                 final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
@@ -344,7 +348,7 @@ public class BitcoinVerde {
             final List<PrivateKey> privateKeys = _secureKeyStore.getPrivateKeys();
 
             final BitcoinNodeManager bitcoinNodeManager = _spvModule.getBitcoinNodeManager();
-            @WeakOuter final NodeManager.NodeFilter<BitcoinNode> nodeFilter = bitcoinNode -> bitcoinNode.hasFeatureEnabled(NodeFeatures.Feature.BLOCKCHAIN_INDEX_ENABLED);
+            @WeakOuter final NodeFilter nodeFilter = bitcoinNode -> bitcoinNode.hasFeatureEnabled(NodeFeatures.Feature.BLOCKCHAIN_INDEX_ENABLED);
             final BitcoinNode bitcoinVerdeNode = bitcoinNodeManager.getNode(nodeFilter);
 
             final AddressInflater addressInflater = new AddressInflater();
@@ -430,7 +434,7 @@ public class BitcoinVerde {
         _initPrivateKeys();
 
         _setStatus(Status.STARTING);
-        final SeedNodeProperties[] seedNodes = _initData.seedNodes;
+        final List<NodeProperties> seedNodes = _initData.seedNodes;
 
         { // Unban any seed nodes... TODO: Reconfigure as whitelist.
             // NOTE: Disabled because the unbanNode function performs a "DELETE...INNER JOIN" which is not supported by H2.
@@ -443,7 +447,7 @@ public class BitcoinVerde {
             //     }
             // }
             try (final DatabaseConnection databaseConnection = database.newConnection()) {
-                for (final SeedNodeProperties seedNodeProperties : seedNodes) {
+                for (final NodeProperties seedNodeProperties : seedNodes) {
                     final Ip nodeIp = Ip.fromHostName(seedNodeProperties.getAddress());
                     if (nodeIp == null) { continue; }
 
@@ -477,7 +481,7 @@ public class BitcoinVerde {
         }
 
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize(), _checkpointConfiguration);
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
             final BlockId headBlockHeaderId = blockHeaderDatabaseManager.getHeadBlockHeaderId();
@@ -667,7 +671,7 @@ public class BitcoinVerde {
         }
 
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize(), _checkpointConfiguration);
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
             final BlockId headBlockId = blockHeaderDatabaseManager.getHeadBlockHeaderId();
@@ -683,7 +687,7 @@ public class BitcoinVerde {
         }
 
         final BitcoinNodeManager bitcoinNodeManager = _spvModule.getBitcoinNodeManager();
-        bitcoinNodeManager.setOnNodeListChanged(_onConnectedNodesChanged);
+        bitcoinNodeManager.setNodeListChangedCallback(_onConnectedNodesChanged);
 
         final AtomicBoolean addressBlocksLoaded = new AtomicBoolean(false);
         @WeakOuter final Runnable newBlockHeaderAvailableCallbackRunnable = () -> {
@@ -794,7 +798,7 @@ public class BitcoinVerde {
 
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize(), _checkpointConfiguration);
             final BlockchainDatabaseManager blockchainDatabaseManager = databaseManager.getBlockchainDatabaseManager();
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
@@ -978,7 +982,7 @@ public class BitcoinVerde {
 
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize(), _checkpointConfiguration);
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
 
             final BlockId headBlockHeaderId = blockHeaderDatabaseManager.getHeadBlockHeaderId();
@@ -1003,7 +1007,7 @@ public class BitcoinVerde {
 
         if ( (_spvModule != null) && (_spvModule.isInitialized()) ) {
             final BitcoinNodeManager bitcoinNodeManager = _spvModule.getBitcoinNodeManager();
-            bitcoinNodeManager.setOnNodeListChanged(onConnectedNodesChanged);
+            bitcoinNodeManager.setNodeListChangedCallback(onConnectedNodesChanged);
         }
     }
 
@@ -1079,7 +1083,7 @@ public class BitcoinVerde {
 
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize(), _checkpointConfiguration);
             final BlockchainDatabaseManager blockchainDatabaseManager = databaseManager.getBlockchainDatabaseManager();
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
             final TransactionDatabaseManager transactionDatabaseManager = databaseManager.getTransactionDatabaseManager();
@@ -1287,7 +1291,7 @@ public class BitcoinVerde {
     public void clearMerkleBlocksAfterTimestamp(final Long timestampInSeconds) {
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize(), _checkpointConfiguration);
             final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
             final SpvBlockDatabaseManager spvBlockDatabaseManager = databaseManager.getBlockDatabaseManager();
 
@@ -1314,7 +1318,7 @@ public class BitcoinVerde {
             final List<PrivateKey> privateKeys = _secureKeyStore.getPrivateKeys();
 
             final BitcoinNodeManager bitcoinNodeManager = _spvModule.getBitcoinNodeManager();
-            @WeakOuter final NodeManager.NodeFilter<BitcoinNode> nodeFilter = bitcoinNode -> bitcoinNode.hasFeatureEnabled(NodeFeatures.Feature.BLOCKCHAIN_INDEX_ENABLED);
+            @WeakOuter final NodeFilter nodeFilter = bitcoinNode -> bitcoinNode.hasFeatureEnabled(NodeFeatures.Feature.BLOCKCHAIN_INDEX_ENABLED);
             final BitcoinNode bitcoinVerdeNode = bitcoinNodeManager.getNode(nodeFilter);
             if (bitcoinVerdeNode == null) { return false; }
 
@@ -1334,23 +1338,35 @@ public class BitcoinVerde {
                     Logger.debug(address.toBase58CheckEncoded());
                 }
             }
-            @WeakOuter final Runnable runnable = () -> bitcoinVerdeNode.getAddressBlocks(addresses, (bitcoinNode, blockHashes) -> {
-                final Database database = _environment.getDatabase();
-                try (final DatabaseConnection databaseConnection = database.newConnection()) {
-                    final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
-                    final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
-                    final SpvBlockDatabaseManager spvBlockDatabaseManager = databaseManager.getBlockDatabaseManager();
+            @WeakOuter final Runnable runnable = () -> bitcoinVerdeNode.getAddressBlocks(addresses, new BitcoinNode.BlockInventoryAnnouncementHandler() {
+                @Override
+                public void onNewInventory(BitcoinNode bitcoinNode, List<Sha256Hash> blockHashes) {
+                    final Database database = _environment.getDatabase();
+                    try (final DatabaseConnection databaseConnection = database.newConnection()) {
+                        final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize(), _checkpointConfiguration);
+                        final BlockHeaderDatabaseManager blockHeaderDatabaseManager = databaseManager.getBlockHeaderDatabaseManager();
+                        final SpvBlockDatabaseManager spvBlockDatabaseManager = databaseManager.getBlockDatabaseManager();
 
-                    TransactionUtil.startTransaction(databaseConnection);
-                    for (final Sha256Hash blockHash : blockHashes) {
-                        final BlockId blockId = blockHeaderDatabaseManager.getBlockHeaderId(blockHash);
-                        Logger.debug("Deleting Partial Merkle Tree: " + blockHash);
-                        spvBlockDatabaseManager.deletePartialMerkleTree(blockId);
+                        TransactionUtil.startTransaction(databaseConnection);
+                        for (final Sha256Hash blockHash : blockHashes) {
+                            final BlockId blockId = blockHeaderDatabaseManager.getBlockHeaderId(blockHash);
+                            Logger.debug("Deleting Partial Merkle Tree: " + blockHash);
+                            spvBlockDatabaseManager.deletePartialMerkleTree(blockId);
+                        }
+                        TransactionUtil.commitTransaction(databaseConnection);
                     }
-                    TransactionUtil.commitTransaction(databaseConnection);
+                    catch (final DatabaseException exception) {
+                        Logger.debug(exception);
+                    }
                 }
-                catch (final DatabaseException exception) {
-                    Logger.debug(exception);
+
+                @Override
+                public void onNewHeaders(BitcoinNode bitcoinNode, List<BlockHeader> blockHeaders) {
+                    final MutableList<Sha256Hash> blockHashes = new MutableList<>();
+                    for (final BlockHeader blockHeader : blockHeaders) {
+                        blockHashes.add(blockHeader.getHash());
+                    }
+                    this.onNewInventory(bitcoinNode, blockHashes);
                 }
             });
 
@@ -1365,7 +1381,7 @@ public class BitcoinVerde {
 
         final Database database = _environment.getDatabase();
         try (final DatabaseConnection databaseConnection = database.newConnection()) {
-            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize());
+            final SpvDatabaseManager databaseManager = new SpvDatabaseManager(databaseConnection, database.getMaxQueryBatchSize(), _checkpointConfiguration);
             final SpvTransactionDatabaseManager transactionDatabaseManager = databaseManager.getTransactionDatabaseManager();
 
             TransactionUtil.startTransaction(databaseConnection);

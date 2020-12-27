@@ -20,20 +20,23 @@ import com.softwareverde.bitcoin.app.android.store.SharedPreferencesKeyValueStor
 import com.softwareverde.bitcoin.app.database.VerdeWalletDatabase;
 import com.softwareverde.bitcoin.app.lib.BitcoinVerde;
 import com.softwareverde.bitcoin.app.lib.NewBlockHeaderCallback;
-import com.softwareverde.bitcoin.server.configuration.SeedNodeProperties;
+import com.softwareverde.bitcoin.server.configuration.NodeProperties;
 import com.softwareverde.bitcoin.server.database.Database;
 import com.softwareverde.bitcoin.server.database.DatabaseConnection;
+import com.softwareverde.bitcoin.server.module.node.manager.BitcoinNodeManager;
 import com.softwareverde.bitcoin.server.module.spv.SpvResourceLoader;
 import com.softwareverde.bitcoin.server.node.BitcoinNode;
 import com.softwareverde.bitcoin.transaction.Transaction;
+import com.softwareverde.constable.list.immutable.ImmutableList;
 import com.softwareverde.constable.list.immutable.ImmutableListBuilder;
 import com.softwareverde.database.DatabaseException;
 import com.softwareverde.database.android.sqlite.AndroidSqliteDatabase;
 import com.softwareverde.database.row.Row;
 import com.softwareverde.logging.LogLevel;
 import com.softwareverde.logging.Logger;
+import com.softwareverde.logging.log.AnnotatedLog;
+import com.softwareverde.logging.log.SystemLog;
 import com.softwareverde.network.p2p.node.NodeConnection;
-import com.softwareverde.network.p2p.node.manager.NodeManager;
 import com.softwareverde.util.StringUtil;
 import com.softwareverde.util.Util;
 import com.softwareverde.util.type.time.SystemTime;
@@ -239,9 +242,14 @@ public class BitcoinVerdeService extends Service {
 
         final Database database = _createDatabase();
 
-        Logger.setLogLevel(NodeManager.class, LogLevel.WARN);
-        Logger.setLogLevel(NodeConnection.class, LogLevel.WARN);
-        Logger.setLogLevel(BitcoinNode.class, LogLevel.WARN);
+        Logger.setLog(AnnotatedLog.getInstance());
+        Logger.setLogLevel(LogLevel.ON);
+        Logger.setLogLevel("com.softwareverde.util", LogLevel.ERROR);
+        Logger.setLogLevel("com.softwareverde.network", LogLevel.INFO);
+        Logger.setLogLevel("com.softwareverde.async.lock", LogLevel.WARN);
+        // Logger.setLogLevel(BitcoinNodeManager.class, LogLevel.WARN);
+        // Logger.setLogLevel(NodeConnection.class, LogLevel.WARN);
+        // Logger.setLogLevel(BitcoinNode.class, LogLevel.WARN);
 
         final BitcoinVerde.InitData initData = new BitcoinVerde.InitData();
         try {
@@ -251,10 +259,10 @@ public class BitcoinVerdeService extends Service {
             initData.keyValueStore = new SharedPreferencesKeyValueStore(applicationContext, "wallet_preferences");
             initData.priceIndexer = new BitcoinDotComPriceIndexer();
             initData.shouldOnlyConnectToSeedNodes = false;
-            initData.seedNodes = new SeedNodeProperties[]{
-                    new SeedNodeProperties("bitcoinverde.org", 8333),
-                    new SeedNodeProperties("btc.softwareverde.com", 8333)
-            };
+            initData.seedNodes = new ImmutableList<NodeProperties>(
+                new NodeProperties("bitcoinverde.org", 8333),
+                new NodeProperties("btc.softwareverde.com", 8333)
+            );
         }
         catch (Exception exception) {
             throw new RuntimeException("Problem creating initData", exception);

@@ -6,8 +6,8 @@ android {
         applicationId "com.softwareverde.bitcoin.app"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
@@ -41,6 +41,8 @@ android {
 }
 
 dependencies {
+    // implementation fileTree(dir: 'libs', include: ['*.jar'])
+
     implementation group: 'org.bouncycastle',                       name: 'bcprov-jdk15on',         version: '1.65'
     implementation group: 'org.bouncycastle',                       name: 'bcpg-jdk15on',           version: '1.65'
 
@@ -48,14 +50,15 @@ dependencies {
     implementation group: 'com.android.support',                    name: 'support-compat',         version: '28.0.0'
     implementation group: 'com.android.support',                    name: 'design',                 version: '28.0.0'
     implementation group: 'com.android.support',                    name: 'recyclerview-v7',        version: '28.0.0'
-    implementation group: 'com.android.support.constraint',         name: 'constraint-layout',      version: '2.0.1'
+    implementation group: 'com.android.support.constraint',         name: 'constraint-layout',      version: '2.0.4'
 
     implementation group: 'com.github.softwareverde',               name: 'json',                   version: 'v2.0.0'
     implementation group: 'com.github.softwareverde',               name: 'java-util',              version: 'v2.1.3'
     implementation group: 'com.github.softwareverde',               name: 'java-async',             version: 'v0.3.0'
 
     implementation group: 'com.github.softwareverde',               name: 'java-db-mysql',          version: 'v4.0.8'
-    implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'd305742c'
+    implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'bbb0f42c'
+
     implementation group: 'com.github.softwareverde',               name: 'java-http-client',       version: 'v2.0.5'
 
     implementation group: 'com.google.zxing',                       name: 'core',                   version: '3.4.0'
