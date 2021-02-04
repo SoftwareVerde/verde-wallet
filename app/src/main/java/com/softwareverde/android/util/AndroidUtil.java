@@ -5,7 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 import android.view.Display;
 import android.view.WindowManager;
 

@@ -2,7 +2,7 @@ package com.softwareverde.qrcodescanner.camera;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.Result;
 

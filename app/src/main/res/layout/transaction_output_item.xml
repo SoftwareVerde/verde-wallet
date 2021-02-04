@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -10,7 +10,7 @@
     android:background="#202020"
     tools:layout_width="205dp" >
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -18,14 +18,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="h,1:1" >
 
-        <android.support.constraint.Guideline
+        <androidx.constraintlayout.widget.Guideline
             android:id="@+id/transaction_output_amount_guideline_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.25"
         />
-        <android.support.constraint.Guideline
+        <androidx.constraintlayout.widget.Guideline
             android:id="@+id/transaction_output_amount_guideline_bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
             app:layout_constraintGuide_percent="0.75"
         />
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintDimensionRatio="w,1:1"
@@ -42,7 +42,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             android:id="@+id/txo_amount_container" >
-            <android.support.constraint.ConstraintLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/txo_left_pane"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -52,7 +52,7 @@
                 app:layout_constraintBottom_toTopOf="@id/txo_confirmation_container"
                 app:layout_constraintRight_toRightOf="parent" >
 
-                <android.support.v7.widget.AppCompatTextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/txo_token_amount"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -71,7 +71,7 @@
                     app:autoSizeTextType="uniform"
                     android:lines="1"
                 />
-                <android.support.v7.widget.AppCompatTextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/txo_amount"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -90,7 +90,7 @@
                     app:autoSizeTextType="uniform"
                     android:lines="1"
                 />
-            </android.support.constraint.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
                 android:id="@+id/txo_confirmation_container"
@@ -151,8 +151,8 @@
                     android:layout_marginRight="1dp"
                 />
             </LinearLayout>
-        </android.support.constraint.ConstraintLayout>
-        <android.support.v7.widget.AppCompatTextView
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/txo_address"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -184,7 +184,7 @@
             android:textSize="12sp"
             android:text="0"
         />
-        <android.support.v7.widget.AppCompatTextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/txo_transaction_hash"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -203,5 +203,5 @@
             app:autoSizeTextType="uniform"
             android:lines="2"
         />
-    </android.support.constraint.ConstraintLayout>
-</android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

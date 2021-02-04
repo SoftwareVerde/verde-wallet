@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/send_transaction_outputs_list_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -20,7 +20,7 @@
         tools:itemCount="3"
     />
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/send_balance_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:paddingTop="2dp"
         android:background="@drawable/send_fragment_bottom_background" >
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/send_to_address_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginBottom="3dp"
             />
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <LinearLayout
             android:id="@+id/selected_amount_container"
             android:layout_width="0dp"
@@ -73,7 +73,7 @@
             app:layout_constraintBottom_toTopOf="@id/send_confirm_bar_container"
             android:background="#404040"
             android:orientation="horizontal" >
-            <android.support.v7.widget.AppCompatTextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/selected_token_amount_total"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -93,7 +93,7 @@
                 app:autoSizeMaxTextSize="32sp"
                 app:autoSizeTextType="uniform"
             />
-            <android.support.v7.widget.AppCompatTextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/selected_amount_total"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -129,7 +129,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="0.5"
                 android:orientation="horizontal">
-                <android.support.v7.widget.AppCompatTextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/desired_send_token_amount"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -147,7 +147,7 @@
                     app:autoSizeTextType="uniform"
                     android:visibility="gone"
                 />
-                <android.support.v7.widget.AppCompatTextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/desired_send_usd_amount"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -164,7 +164,7 @@
                     app:autoSizeMaxTextSize="32sp"
                     app:autoSizeTextType="uniform"
                 />
-                <android.support.v7.widget.AppCompatTextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/desired_send_amount"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -197,14 +197,14 @@
             />
         </LinearLayout>
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/send_confirm_bar_container"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent" >
 
-            <android.support.v7.widget.AppCompatSeekBar
+            <androidx.appcompat.widget.AppCompatSeekBar
                 android:id="@+id/send_confirm_bar"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
@@ -232,8 +232,8 @@
                 android:enabled="false"
                 android:clickable="false"
             />
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
