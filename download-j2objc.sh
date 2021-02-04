@@ -16,7 +16,7 @@ if [ -d "j2objc" ]; then
     exit 1
 fi
 
-wget "${url}"
+curl -O -L "${url}"
 
 unzip "j2objc-${version}.zip"
 rm "j2objc-${version}.zip"

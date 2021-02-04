@@ -83,7 +83,7 @@ function copy_maven_dependency() {
     cd tmp/jar/
     if [ ! -f "${jar_cache_dir}/${jar_file}" ]; then
         cd "${jar_cache_dir}"
-        wget --quiet "${download_url}"
+        curl -O -L "${download_url}"
         cd -
     fi
     mkdir -p unzip
