@@ -1,7 +1,5 @@
 package com.softwareverde.bitcoin.app.lib;
 
-import android.util.Log;
-
 import com.google.j2objc.annotations.AutoreleasePool;
 import com.google.j2objc.annotations.WeakOuter;
 import com.softwareverde.async.ConcurrentHashSet;
@@ -41,7 +39,8 @@ import com.softwareverde.bitcoin.transaction.output.identifier.TransactionOutput
 import com.softwareverde.bitcoin.wallet.SeedPhraseGenerator;
 import com.softwareverde.bitcoin.wallet.Wallet;
 import com.softwareverde.bloomfilter.MutableBloomFilter;
-import com.softwareverde.concurrent.pool.MainThreadPool;
+import com.softwareverde.concurrent.pool.cached.CachedThread;
+import com.softwareverde.concurrent.pool.cached.CachedThreadPool;
 import com.softwareverde.constable.bytearray.MutableByteArray;
 import com.softwareverde.constable.list.List;
 import com.softwareverde.constable.list.mutable.MutableList;
@@ -175,7 +174,7 @@ public class BitcoinVerde {
 
     protected Thread _initThread = null;
     protected volatile Boolean _abortInit = false;
-    protected final MainThreadPool _mainThreadPool;
+    protected final CachedThreadPool _mainThreadPool;
 
     protected Environment _environment;
     protected KeyStore _secureKeyStore;
@@ -264,6 +263,7 @@ public class BitcoinVerde {
         BitcoinVerde.INSTANCE = null;
 
         Logger.debug("BitcoinVerde has completely shut down.");
+        _mainThreadPool.stop();
     }
 
     protected void _setStatus(final Status status) {
@@ -437,15 +437,7 @@ public class BitcoinVerde {
         final List<NodeProperties> seedNodes = _initData.seedNodes;
 
         { // Unban any seed nodes... TODO: Reconfigure as whitelist.
-            // NOTE: Disabled because the unbanNode function performs a "DELETE...INNER JOIN" which is not supported by H2.
-            // final BanFilter banFilter = new BanFilter(database.newConnectionFactory());
-            // for (final Configuration.SeedNodeProperties seedNodeProperties : seedNodes) {
-            //     final Ip nodeIp = Ip.fromHostName(seedNodeProperties.getAddress());
-            //     if (nodeIp == null) { continue; }
-            //     if (banFilter.isIpBanned(nodeIp)) {
-            //         banFilter.unbanNode(nodeIp);
-            //     }
-            // }
+            // NOTE: BitcoinNodeDatabaseManager::setIsBanned is not used because the setIsBanned function performs a "DELETE...INNER JOIN" which is not supported by Sqlite.
             try (final DatabaseConnection databaseConnection = database.newConnection()) {
                 for (final NodeProperties seedNodeProperties : seedNodes) {
                     final Ip nodeIp = Ip.fromHostName(seedNodeProperties.getAddress());
@@ -871,7 +863,13 @@ public class BitcoinVerde {
 
     protected BitcoinVerde(final InitData initData) {
         _initData = initData;
-        _mainThreadPool = new MainThreadPool(6, 5000L);
+        _mainThreadPool = new CachedThreadPool(8, 30000L) {
+            @Override
+            protected void returnThread(CachedThread cachedThread) {
+                super.returnThread(cachedThread);
+            }
+        };
+        _mainThreadPool.start();
 
         _wallet.setSatoshisPerByteFee(1D);
 
@@ -882,7 +880,7 @@ public class BitcoinVerde {
             catch (final Exception exception) {
                 Logger.error(exception);
                 _mainThreadPool.execute(() -> {
-                    shutdown();
+                    BitcoinVerde.this.shutdown();
                 });
             }
             finally {
@@ -1154,9 +1152,9 @@ public class BitcoinVerde {
     public void setIsConnected(final Boolean isConnected) {
         _waitForInitialization();
 
-        if ( (isConnected) && (! _isConnected) ) {
-            _spvModule.connectToSeedNodes();
-        }
+//        if ( (isConnected) && (! _isConnected) ) {
+//            _spvModule.connectToSeedNodes();
+//        }
 
         _isConnected = isConnected;
     }

@@ -37,11 +37,13 @@ android {
         exclude 'README.md'
         exclude 'CHANGES.md'
         exclude 'LEGAL.txt'
+
+        pickFirst '*'
     }
 }
 
 dependencies {
-    // implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation group: 'org.bouncycastle',                       name: 'bcprov-jdk15on',         version: '1.65'
     implementation group: 'org.bouncycastle',                       name: 'bcpg-jdk15on',           version: '1.65'
@@ -52,14 +54,15 @@ dependencies {
     implementation group: 'com.android.support',                    name: 'recyclerview-v7',        version: '28.0.0'
     implementation group: 'com.android.support.constraint',         name: 'constraint-layout',      version: '2.0.4'
 
-    implementation group: 'com.github.softwareverde',               name: 'json',                   version: 'v2.0.0'
-    implementation group: 'com.github.softwareverde',               name: 'java-util',              version: 'v2.1.3'
-    implementation group: 'com.github.softwareverde',               name: 'java-async',             version: 'v0.3.0'
+    // implementation group: 'com.github.softwareverde',               name: 'json',                   version: 'v2.0.0'
+    // implementation group: 'com.github.softwareverde',               name: 'java-util',              version: 'v2.1.3'
+    // implementation group: 'com.github.softwareverde',               name: 'java-async',             version: 'v0.3.0'
 
-    implementation group: 'com.github.softwareverde',               name: 'java-db-mysql',          version: 'v4.0.8'
-    implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'bbb0f42c'
+    // implementation group: 'com.github.softwareverde',               name: 'java-db-mysql',          version: 'v4.0.8'
+    // implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'bbb0f42c'
+    implementation group: 'com.github.softwareverde',  name: 'bitcoin-verde', version: '7e0613f8'
 
-    implementation group: 'com.github.softwareverde',               name: 'java-http-client',       version: 'v2.0.5'
+    // implementation group: 'com.github.softwareverde',               name: 'java-http-client',       version: 'v2.0.5'
 
     implementation group: 'com.google.zxing',                       name: 'core',                   version: '3.4.0'
     implementation group: 'com.google.zxing',                       name: 'android-core',           version: '3.3.0'

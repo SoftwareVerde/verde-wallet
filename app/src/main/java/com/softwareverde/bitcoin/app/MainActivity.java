@@ -361,7 +361,7 @@ public class MainActivity extends VerdeActivity {
             }
         });
 
-        _bitcoinVerde.setOnSynchronizationComplete(new Runnable() {
+        final Runnable showMainLayout = new Runnable() {
             @Override
             public void run() {
                 final Activity mainActivity = MainActivity.this;
@@ -385,9 +385,15 @@ public class MainActivity extends VerdeActivity {
                     }
                 });
             }
-        });
+        };
+
+        _bitcoinVerde.setOnSynchronizationComplete(showMainLayout);
 
         _connectivityService.wakeUp();
+
+        if (true) {
+            showMainLayout.run();
+        }
     }
 
     @Override
