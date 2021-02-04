@@ -5,8 +5,9 @@ import com.softwareverde.bitcoin.server.message.type.node.feature.NodeFeatures;
 import com.softwareverde.bitcoin.server.message.type.query.response.hash.InventoryItem;
 import com.softwareverde.bitcoin.server.message.type.query.response.hash.InventoryItemType;
 import com.softwareverde.bitcoin.server.node.BitcoinNode;
+import com.softwareverde.bitcoin.server.node.RequestId;
 import com.softwareverde.bitcoin.transaction.Transaction;
-import com.softwareverde.concurrent.pool.MainThreadPool;
+import com.softwareverde.concurrent.pool.cached.CachedThreadPool;
 import com.softwareverde.constable.list.List;
 import com.softwareverde.constable.list.mutable.MutableList;
 import com.softwareverde.cryptography.hash.sha256.Sha256Hash;
@@ -19,7 +20,9 @@ public class BitcoinNodeUtil {
     public static List<Transaction> getTransactions(final List<Sha256Hash> transactionHashes) throws Exception {
         final MutableList<Transaction> transactions = new MutableList<Transaction>();
 
-        final MainThreadPool mainThreadPool = new MainThreadPool(1, 5000L);
+        final CachedThreadPool mainThreadPool = new CachedThreadPool(1, 5000L);
+        mainThreadPool.start();
+
         final LocalNodeFeatures localNodeFeatures = new LocalNodeFeatures() {
             @Override
             public NodeFeatures getNodeFeatures() {
@@ -32,7 +35,7 @@ public class BitcoinNodeUtil {
 
         final Object pin = new Object();
         final BitcoinNode bitcoinNode = new BitcoinNode("bitcoinverde.org", 8333, mainThreadPool, localNodeFeatures);
-        bitcoinNode.setNodeDisconnectedCallback(new Node.NodeDisconnectedCallback() {
+        bitcoinNode.setDisconnectedCallback(new Node.DisconnectedCallback() {
             @Override
             public void onNodeDisconnected() {
                 synchronized (pin) {
@@ -40,12 +43,12 @@ public class BitcoinNodeUtil {
                 }
             }
         });
-        bitcoinNode.setNodeHandshakeCompleteCallback(new Node.NodeHandshakeCompleteCallback() {
+        bitcoinNode.setHandshakeCompleteCallback(new Node.HandshakeCompleteCallback() {
             @Override
             public void onHandshakeComplete() {
                 bitcoinNode.requestTransactions(transactionHashes, new BitcoinNode.DownloadTransactionCallback() {
                     @Override
-                    public void onResult(final Transaction transaction) {
+                    public void onResult(final RequestId requestId, final BitcoinNode bitcoinNode, final Transaction transaction) {
                         transactions.add(transaction);
                         System.out.println("Downloaded Transaction: " + transaction.getHash());
 
@@ -74,11 +77,13 @@ public class BitcoinNodeUtil {
             pin.wait(500L);
         }
 
+        mainThreadPool.stop();
+
         return transactions;
     }
 
     public static void broadcastTransaction(final Transaction transaction) throws Exception {
-        final MainThreadPool mainThreadPool = new MainThreadPool(1, 5000L);
+        final CachedThreadPool mainThreadPool = new CachedThreadPool(1, 5000L);
         final LocalNodeFeatures localNodeFeatures = new LocalNodeFeatures() {
             @Override
             public NodeFeatures getNodeFeatures() {
@@ -91,7 +96,7 @@ public class BitcoinNodeUtil {
 
         final Object pin = new Object();
         final BitcoinNode bitcoinNode = new BitcoinNode("btc.softwareverde.com", 8333, mainThreadPool, localNodeFeatures);
-        bitcoinNode.setNodeDisconnectedCallback(new Node.NodeDisconnectedCallback() {
+        bitcoinNode.setDisconnectedCallback(new Node.DisconnectedCallback() {
             @Override
             public void onNodeDisconnected() {
                 synchronized (pin) {
@@ -99,7 +104,7 @@ public class BitcoinNodeUtil {
                 }
             }
         });
-        bitcoinNode.setNodeHandshakeCompleteCallback(new Node.NodeHandshakeCompleteCallback() {
+        bitcoinNode.setHandshakeCompleteCallback(new Node.HandshakeCompleteCallback() {
             @Override
             public void onHandshakeComplete() {
                 final MutableList<Sha256Hash> transactionHashes = new MutableList<Sha256Hash>(1);
@@ -107,9 +112,9 @@ public class BitcoinNodeUtil {
                 bitcoinNode.transmitTransactionHashes(transactionHashes);
             }
         });
-        bitcoinNode.setRequestDataCallback(new BitcoinNode.RequestDataCallback() {
+        bitcoinNode.setRequestDataHandler(new BitcoinNode.RequestDataHandler() {
             @Override
-            public void run(final List<InventoryItem> dataHashes, final BitcoinNode bitcoinNode) {
+            public void run(final BitcoinNode bitcoinNode, final List<InventoryItem> dataHashes) {
                 boolean transactionWasBroadcasted = false;
                 for (final InventoryItem inventoryItem : dataHashes) {
                     if (inventoryItem.getItemType() != InventoryItemType.TRANSACTION) { continue; }
