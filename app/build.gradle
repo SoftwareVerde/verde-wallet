@@ -1,75 +1,159 @@
-apply plugin: 'com.android.application'
+group 'com.softwareverde'
+version '2.0.0'
 
-android {
-    compileSdkVersion 28
-    defaultConfig {
-        applicationId "com.softwareverde.bitcoin.app"
-        minSdkVersion 24
-        targetSdkVersion 28
-        versionCode 2
-        versionName "2.0.0"
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+boolean isAndroid = true
+
+if (getGradle().getStartParameter().getTaskRequests().toString().toLowerCase().contains("jar")) {
+    apply plugin: 'com.android.library'
+    isAndroid = false
+}
+else {
+    apply plugin: 'com.android.application'
+
+
+    android {
+        compileSdkVersion 30
+        defaultConfig {
+            applicationId "com.softwareverde.bitcoin.app"
+            minSdkVersion 24
+            targetSdkVersion 30
+            versionCode 2
+            versionName "2.0.0"
+            testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        }
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
+        buildTypes {
+            release {
+                minifyEnabled false
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            }
+        }
+
+        flavorDimensions "type"
+        productFlavors {
+            app {
+                dimension "type"
+            }
+        }
+
+        sourceSets {
+            main {
+                java
+                resources
+
+                manifest.srcFile 'src/main/AndroidManifest.xml'
+                res.srcDirs = ['src/main/res']
+                java.srcDirs = ['src/main/java']
+            }
+            app {
+                java
+                resources
+
+                manifest.srcFile 'src/app/AndroidManifest.xml'
+                res.srcDirs = ['src/main/res', 'src/app/res']
+                java.srcDirs = ['src/main/java', 'src/app/java']
+            }
+            test {
+                java
+                resources
+
+                manifest.srcFile 'src/app/AndroidManifest.xml'
+                res.srcDirs = ['src/main/res', 'src/app/res', 'src/test/res']
+                java.srcDirs = ['src/main/java', 'src/app/java', 'src/test/java']
+            }
+        }
+
+        packagingOptions {
+            exclude 'META-INF/DEPENDENCIES'
+            exclude 'META-INF/CONTRIBUTING'
+            exclude 'META-INF/LICENSE'
+            exclude 'META-INF/LICENSE.txt'
+            exclude 'META-INF/license.txt'
+            exclude 'META-INF/NOTICE'
+            exclude 'META-INF/NOTICE.txt'
+            exclude 'META-INF/notice.txt'
+            exclude 'META-INF/ASL2.0'
+
+            exclude 'CONTRIBUTORS.md'
+            exclude 'CONTRIBUTING.md'
+            exclude 'README.md'
+            exclude 'CHANGES.md'
+            exclude 'LEGAL.txt'
+
+            pickFirst '*'
         }
     }
+}
 
-    packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/CONTRIBUTING'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/ASL2.0'
+sourceSets {
+    main {
+        java
+        resources
+    }
+    app {
+        java
+        resources
 
-        exclude 'CONTRIBUTORS.md'
-        exclude 'CONTRIBUTING.md'
-        exclude 'README.md'
-        exclude 'CHANGES.md'
-        exclude 'LEGAL.txt'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+    test {
+        java
+        resources
 
-        pickFirst '*'
+        compileClasspath += sourceSets.app.output
+        runtimeClasspath += sourceSets.app.output
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation group: 'org.bouncycastle',                       name: 'bcprov-jdk15on',         version: '1.65'
-    implementation group: 'org.bouncycastle',                       name: 'bcpg-jdk15on',           version: '1.65'
+    api group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.65'
+    api group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: '1.65'
+    api group: 'com.github.softwareverde', name: 'bitcoin-verde', version: '7e0613f8'
+    api group: 'com.google.j2objc', name: 'j2objc-annotations', version: '1.3'
+    api group: 'com.google.zxing', name: 'core', version: '3.4.0'
+    api group: 'com.google.zxing', name: 'android-core', version: '3.3.0'
 
-    implementation group: 'androidx.appcompat',                    name: 'appcompat',           version: '1.0.0'
-    implementation group: 'androidx.core',                    name: 'core',         version: '1.0.0'
-    implementation group: 'com.google.android.material',                    name: 'material',                 version: '1.0.0'
-    implementation group: 'androidx.recyclerview',                    name: 'recyclerview',        version: '1.0.0'
-    implementation group: 'androidx.constraintlayout',         name: 'constraintlayout',      version: '1.1.3'
+    appImplementation group: 'androidx.appcompat', name: 'appcompat', version: '1.2.0'
+    appImplementation group: 'androidx.core', name: 'core', version: '1.3.2'
+    appImplementation group: 'com.google.android.material', name: 'material', version: '1.2.1'
+    appImplementation group: 'androidx.recyclerview', name: 'recyclerview', version: '1.1.0'
+    appImplementation group: 'androidx.constraintlayout', name: 'constraintlayout', version: '2.0.4'
 
-    // implementation group: 'com.github.softwareverde',               name: 'json',                   version: 'v2.0.0'
-    // implementation group: 'com.github.softwareverde',               name: 'java-util',              version: 'v2.1.3'
-    // implementation group: 'com.github.softwareverde',               name: 'java-async',             version: 'v0.3.0'
+    testImplementation group: 'junit', name: 'junit', version: '4.13'
 
-    // implementation group: 'com.github.softwareverde',               name: 'java-db-mysql',          version: 'v4.0.8'
-    // implementation group: 'com.github.softwareverde',               name: 'bitcoin-verde',          version: 'bbb0f42c'
-    implementation group: 'com.github.softwareverde',  name: 'bitcoin-verde', version: '7e0613f8'
+    if (isAndroid) {
+        androidTestImplementation group: 'androidx.test.ext', name: 'junit', version: '1.1.2'
+        androidTestImplementation group: 'androidx.test.espresso', name: 'espresso-core', version: '3.3.0'
+    }
+}
 
-    // implementation group: 'com.github.softwareverde',               name: 'java-http-client',       version: 'v2.0.5'
+if (! isAndroid) {
+    task makeJar(type: Jar) {
+        manifest {
+            attributes  'Implementation-Title': 'Bitcoin Wallet Library',
+                        'Implementation-Version': archiveVersion,
+                        'Class-Path': (project.configurations.compileClasspath + configurations.runtimeClasspath).collect { 'libs/' + it.getName() }.join(' ')
+        }
 
-    implementation group: 'com.google.zxing',                       name: 'core',                   version: '3.4.0'
-    implementation group: 'com.google.zxing',                       name: 'android-core',           version: '3.3.0'
-    implementation group: 'com.google.j2objc',                      name: 'j2objc-annotations',     version: '1.3'
+        archiveBaseName = project.name + '-lib'
 
-    testImplementation group: 'junit',                              name: 'junit',                  version: '4.13'
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    androidTestImplementation group: 'androidx.test.ext',    name: 'junit',                 version: '1.1.1'
-    androidTestImplementation group: 'androidx.test.espresso', name: 'espresso-core',    version: '3.1.0'
+        from sourceSets.main.output
+
+        with jar
+    }
+
+    task copyDependencies(type: Copy) {
+        from (configurations.compileClasspath + configurations.runtimeClasspath)
+        into "$buildDir/libs/libs"
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
 }

@@ -1,5 +1,7 @@
 package com.softwareverde.logging;
 
+import com.softwareverde.logging.LineNumberAnnotatedLog;
+import com.softwareverde.logging.StackTraceManager;
 import com.softwareverde.logging.log.BufferedSystemWriter;
 import com.softwareverde.logging.log.SystemLog;
 
