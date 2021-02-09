@@ -39,7 +39,6 @@ import com.softwareverde.bitcoin.transaction.output.identifier.TransactionOutput
 import com.softwareverde.bitcoin.wallet.SeedPhraseGenerator;
 import com.softwareverde.bitcoin.wallet.Wallet;
 import com.softwareverde.bloomfilter.MutableBloomFilter;
-import com.softwareverde.concurrent.pool.cached.CachedThread;
 import com.softwareverde.concurrent.pool.cached.CachedThreadPool;
 import com.softwareverde.constable.bytearray.MutableByteArray;
 import com.softwareverde.constable.list.List;
@@ -863,12 +862,7 @@ public class BitcoinVerde {
 
     protected BitcoinVerde(final InitData initData) {
         _initData = initData;
-        _mainThreadPool = new CachedThreadPool(8, 30000L) {
-            @Override
-            protected void returnThread(CachedThread cachedThread) {
-                super.returnThread(cachedThread);
-            }
-        };
+        _mainThreadPool = new CachedThreadPool(8, 30000L);
         _mainThreadPool.start();
 
         _wallet.setSatoshisPerByteFee(1D);
