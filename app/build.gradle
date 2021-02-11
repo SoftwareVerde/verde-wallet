@@ -94,7 +94,7 @@ dependencies {
 
     implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.65'
     implementation group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: '1.65'
-    implementation group: 'com.github.softwareverde', name: 'bitcoin-verde', version: '6fd0e418'
+    implementation group: 'com.github.softwareverde', name: 'bitcoin-verde', version: 'b9d73de4'
     implementation group: 'com.google.j2objc', name: 'j2objc-annotations', version: '1.3'
     implementation group: 'com.google.zxing', name: 'core', version: '3.4.0'
     implementation group: 'com.google.zxing', name: 'android-core', version: '3.3.0'
