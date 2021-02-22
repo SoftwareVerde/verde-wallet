@@ -1,7 +1,5 @@
 package com.softwareverde.logging;
 
-import com.softwareverde.logging.LineNumberAnnotatedLog;
-import com.softwareverde.logging.StackTraceManager;
 import com.softwareverde.logging.log.BufferedSystemWriter;
 import com.softwareverde.logging.log.SystemLog;
 
@@ -13,8 +11,8 @@ public class AndroidLog extends LineNumberAnnotatedLog {
             synchronized (INSTANCE_MUTEX) {
                 if (INSTANCE == null) {
                     INSTANCE = new AndroidLog(
-                            SystemLog.wrapSystemStream(System.out),
-                            SystemLog.wrapSystemStream(System.err)
+                        SystemLog.wrapSystemStream(System.out),
+                        SystemLog.wrapSystemStream(System.err)
                     );
                 }
             }

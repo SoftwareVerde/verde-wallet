@@ -3,6 +3,7 @@ package com.softwareverde.android.database.sqlite;
 import android.content.Context;
 
 import com.softwareverde.database.Database;
+import com.softwareverde.logging.Logger;
 
 import java.sql.Connection;
 
@@ -12,12 +13,12 @@ public class AndroidSqliteDatabase extends AndroidSqliteDatabaseConnectionFactor
     }
 
     public Boolean shouldBeCreated() {
-        final AndroidDatabaseHelper databaseHelper = getThreadDatabaseHelper();
+        final AndroidDatabaseHelper databaseHelper = this.getThreadDatabaseHelper();
         if (databaseHelper == null) {
+            Logger.error("Unable to get database helper.");
             return false;
         }
-        else {
-            return databaseHelper.shouldBeCreated();
-        }
+
+        return databaseHelper.shouldBeCreated();
     }
 }

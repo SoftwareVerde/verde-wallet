@@ -179,31 +179,25 @@ public class BitcoinVerdeService extends Service {
 
     private Database _createDatabase() {
         final Context applicationContext = this.getApplicationContext();
-        final Resources resources = applicationContext.getResources();
 
-        final String databaseDataDirectory = (applicationContext.getFilesDir().getAbsolutePath() + "/database");
+        final String databaseName = "bitcoin";
+        final File databaseFile = applicationContext.getDatabasePath(databaseName);
 
         AndroidSqliteDatabase sqliteDatabase = null;
         for (int i = 0; i < 2; ++i) {
-            sqliteDatabase = new AndroidSqliteDatabase(applicationContext, "bitcoin", 1);
+            sqliteDatabase = new AndroidSqliteDatabase(applicationContext, databaseName, SpvResourceLoader.DATABASE_VERSION);
 
             try (final DatabaseConnection databaseConnection = sqliteDatabase.newConnection()) {
-                if (! sqliteDatabase.shouldBeCreated()) {
-                    continue;
-                }
+                if (! sqliteDatabase.shouldBeCreated()) { continue; }
+                if (_isDatabaseInitialized(databaseConnection)) { break; }
 
-                if (_isDatabaseInitialized(databaseConnection)) {
-                    break;
-                }
-                else {
-                    final String initSql = SpvResourceLoader.getResource(SpvResourceLoader.INIT_SQL_SQLITE);
-                    BitcoinVerde.runSqlInitFile(databaseConnection, initSql);
-                    break;
-                }
+                final String initSql = SpvResourceLoader.getResource(SpvResourceLoader.INIT_SQL_SQLITE);
+                BitcoinVerde.runSqlInitFile(databaseConnection, initSql);
+                break;
             }
             catch (final Exception exception) {
-                exception.printStackTrace();
-                BitcoinVerdeService.deleteRecursive(new File(databaseDataDirectory));
+                Logger.error(exception);
+                BitcoinVerdeService.deleteRecursive(databaseFile);
                 sqliteDatabase = null;
             }
         }
@@ -230,23 +224,28 @@ public class BitcoinVerdeService extends Service {
         return (! rows.isEmpty());
     }
 
+    protected Boolean _doesDatabaseRequireUpgrade(final DatabaseConnection databaseConnection) throws DatabaseException {
+        final java.util.List<Row> rows = databaseConnection.query("SELECT version FROM metadata ORDER BY timestamp DESC LIMIT 1", null);
+        if (rows.isEmpty()) { return true; }
+
+        final Row row = rows.get(0);
+        final Long databaseVersion = row.getLong("version");
+        return (databaseVersion < SpvResourceLoader.DATABASE_VERSION);
+    }
+
     @Override
     public void onCreate() {
-        final Context applicationContext = this.getApplicationContext();
-        final Resources resources = applicationContext.getResources();
-
-        _initNotificationChannel(this);
-
-        final Database database = _createDatabase();
-
         Logger.setLog(AndroidLog.getInstance());
         Logger.setLogLevel(LogLevel.ON);
         Logger.setLogLevel("com.softwareverde.util", LogLevel.ERROR);
         Logger.setLogLevel("com.softwareverde.network", LogLevel.INFO);
         Logger.setLogLevel("com.softwareverde.async.lock", LogLevel.WARN);
-        // Logger.setLogLevel(BitcoinNodeManager.class, LogLevel.WARN);
-        // Logger.setLogLevel(NodeConnection.class, LogLevel.WARN);
-        // Logger.setLogLevel(BitcoinNode.class, LogLevel.WARN);
+
+        final Context applicationContext = this.getApplicationContext();
+
+        _initNotificationChannel(this);
+
+        final Database database = _createDatabase();
 
         final BitcoinVerde.InitData initData = new BitcoinVerde.InitData();
         try {

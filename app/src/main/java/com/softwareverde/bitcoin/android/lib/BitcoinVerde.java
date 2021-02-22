@@ -446,7 +446,7 @@ public class BitcoinVerde {
                     {
                         final java.util.List<Row> rows = databaseConnection.query(
                             new Query("SELECT id FROM hosts WHERE host = ?")
-                                    .setParameter(nodeIp)
+                                .setParameter(nodeIp)
                         );
 
                         if (rows.isEmpty()) { continue; }
@@ -462,9 +462,19 @@ public class BitcoinVerde {
 
                     databaseConnection.executeSql(
                         new Query("UPDATE hosts SET is_banned = 0 WHERE id = ?")
-                                .setParameter(hostId)
+                            .setParameter(hostId)
                     );
                 }
+            }
+            catch (final DatabaseException exception) {
+                Logger.error(exception);
+            }
+        }
+
+        { // Reconsider any invalid blocks... (Not ideal, but is a workaround for valid blocks being considered invalid during shutdown)
+            try (final DatabaseConnection databaseConnection = database.newConnection()) {
+                Logger.info("Reconsidering invalid blocks.");
+                databaseConnection.executeSql(new Query("DELETE FROM invalid_blocks"));
             }
             catch (final DatabaseException exception) {
                 Logger.error(exception);
@@ -721,6 +731,9 @@ public class BitcoinVerde {
                     bitcoinVerde._setStatus(Status.ONLINE);
                     bitcoinVerde._spvModule.loop();
                     bitcoinVerde._setStatus(Status.OFFLINE);
+                }
+                else {
+                    Logger.error("Unable to run SpvModule; reference not found.");
                 }
             }
             catch (final Exception exception) {

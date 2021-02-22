@@ -17,7 +17,7 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper {
     @Override
     protected void finalize() throws Throwable {
         try {
-            close();
+            this.close();
         }
         finally {
             super.finalize();
@@ -26,16 +26,19 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(final SQLiteDatabase db) {
+        // The database does not currently exist.
         _currentVersion = null;
     }
 
     @Override
-    public void onUpgrade(final SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
+        // The database version does not match the required version.
         _currentVersion = oldVersion;
     }
 
     @Override
-    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onDowngrade(SQLiteDatabase db, final int oldVersion, final int newVersion) {
+        // The database version does not match the required version.
         _currentVersion = oldVersion;
     }
 
@@ -52,10 +55,10 @@ public class AndroidDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Boolean shouldBeUpgraded() {
-        return (_currentVersion != null && _currentVersion < _requiredDatabaseVersion);
+        return ( (_currentVersion != null) && (_currentVersion < _requiredDatabaseVersion) );
     }
 
     public Boolean shouldBeDowngraded() {
-        return (_currentVersion != null && _currentVersion > _requiredDatabaseVersion);
+        return ( (_currentVersion != null) && (_currentVersion > _requiredDatabaseVersion) );
     }
 }

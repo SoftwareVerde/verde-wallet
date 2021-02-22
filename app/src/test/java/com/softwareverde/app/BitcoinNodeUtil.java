@@ -15,7 +15,7 @@ import com.softwareverde.network.p2p.node.Node;
 import com.softwareverde.util.Util;
 
 public class BitcoinNodeUtil {
-    protected BitcoinNodeUtil() { }
+    public BitcoinNodeUtil() { }
 
     public static List<Transaction> getTransactions(final List<Sha256Hash> transactionHashes) throws Exception {
         final MutableList<Transaction> transactions = new MutableList<Transaction>();

@@ -13,6 +13,7 @@ import com.softwareverde.bitcoin.android.lib.Node;
 import com.softwareverde.constable.list.List;
 import com.softwareverde.constable.list.mutable.MutableList;
 import com.softwareverde.util.StringUtil;
+import com.softwareverde.util.Util;
 
 import java.util.Comparator;
 
@@ -42,7 +43,16 @@ public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.ViewHo
         _dataSet.sort(new Comparator<Node>() {
             @Override
             public int compare(final Node node0, final Node node1) {
-                int pingCompare = (node0.getPing().compareTo(node1.getPing()));
+                final Long nodePing0 = node0.getPing();
+                final Long nodePing1 = node1.getPing();
+
+                { // Handle null ping...
+                    if (Util.areEqual(nodePing0, nodePing1)) { return 0; }
+                    if (nodePing0 == null) { return 1; }
+                    if (nodePing1 == null) { return -1; }
+                }
+
+                int pingCompare = (nodePing0.compareTo(nodePing1));
                 if (pingCompare != 0) { return pingCompare; }
 
                 return ( (node0.getIp()).compareTo(node1.getIp()) );
@@ -64,8 +74,19 @@ public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.ViewHo
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, final int position) {
         final Node node = _dataSet.get(position);
 
+        final String pingText;
+        {
+            final Long nodePing = node.getPing();
+            if (nodePing == null) {
+                pingText = "??";
+            }
+            else {
+                pingText = (StringUtil.formatNumberString(nodePing) + "ms");
+            }
+        }
+
         viewHolder.userAgentView.setText(node.getUserAgent());
-        viewHolder.pingView.setText(StringUtil.formatNumberString(node.getPing().intValue()) + "ms");
+        viewHolder.pingView.setText(pingText);
         viewHolder.ipView.setText(node.getIp() + ":" + node.getPort());
     }
 

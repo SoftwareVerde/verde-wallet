@@ -25,21 +25,21 @@ public class AndroidSqliteDatabaseConnectionFactory implements DatabaseConnectio
     }
 
     public AndroidDatabaseHelper getThreadDatabaseHelper() {
-        return _threadDatabaseHelper.get();
+        final AndroidDatabaseHelper cachedDatabaseHelper = _threadDatabaseHelper.get();
+        if (cachedDatabaseHelper != null) { return cachedDatabaseHelper; }
+
+        final AndroidDatabaseHelper databaseHelper = new AndroidDatabaseHelper(_context, _databaseName, _requiredDatabaseVersion);
+        databaseHelper.setWriteAheadLoggingEnabled(true);
+        _threadDatabaseHelper.set(databaseHelper);
+        synchronized (_databaseHelperReferences) {
+            _databaseHelperReferences.add(new WeakReference<>(databaseHelper));
+        }
+        return databaseHelper;
     }
 
     @Override
     public DatabaseConnection newConnection() {
-        AndroidDatabaseHelper databaseHelper = _threadDatabaseHelper.get();
-        if (databaseHelper == null) {
-            databaseHelper = new AndroidDatabaseHelper(_context, _databaseName, _requiredDatabaseVersion);
-            databaseHelper.setWriteAheadLoggingEnabled(true);
-            _threadDatabaseHelper.set(databaseHelper);
-            synchronized (_databaseHelperReferences) {
-                _databaseHelperReferences.add(new WeakReference<>(databaseHelper));
-            }
-        }
-
+        final AndroidDatabaseHelper databaseHelper = this.getThreadDatabaseHelper();
         final AndroidSqliteDatabaseConnection androidSqliteDatabaseConnection = new AndroidSqliteDatabaseConnection(databaseHelper, _databaseName);
         return new SqliteDatabaseConnectionWrapper(androidSqliteDatabaseConnection);
     }
